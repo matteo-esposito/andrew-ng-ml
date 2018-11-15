@@ -12,9 +12,10 @@
 \renewcommand\maketitlehooka{\null\mbox{}\vfill}
 \renewcommand\maketitlehookd{\vfill\null}
 
-% Custom paragraph spacing
-\setlength{\parskip}{0.75em}
-\setcounter{section}{-1}
+% Custom settings
+\setlength{\parskip}{0.75em}  % Paragraph spacing
+\setcounter{section}{-1} % Page numbers to start on page 1
+\setlength\parindent{0pt} % Remove indenting from entire file
 
 \title{Machine Learning -  Andrew Ng}
 \author{Matteo Esposito}
@@ -87,7 +88,8 @@
                     \FOR{$n >= 1$}
                         \STATE $n = $number of features, $m = $number of samples
                         \STATE \emph{repeat until convergence}:
-                        \STATE \hspace{12pt}$\theta_j \gets \theta_j - \alpha\frac{\partial}{\partial\theta_j}J(\theta_{0},\theta_{1}) = \theta_j - \alpha\frac{1}{m}\sum_{i=1}^{m}(h_{\theta}(x^{(i)})-y^{(i)})x_{j}^{(i)}$
+                        \STATE \hspace{12pt}$\theta_j \gets \theta_j - \alpha\frac{\partial}{\partial\theta_j}J(\theta_{0},\theta_{1}) =
+                                            \theta_j - \alpha\frac{1}{m}\sum_{i=1}^{m}((h_{\theta}(x^{(i)})-y^{(i)})x_j^{(i)})$
                     \ENDFOR
                 \end{algorithmic}
             \end{algorithm}
@@ -98,30 +100,127 @@
             The slope of the tangent is the derivative at that point and it will give us a direction to move towards.
             We make steps down the cost function in the direction with the steepest descent. 
             The size of each step is determined by the parameter $\alpha$, which is called the learning rate.
-
+            
+    % Week 1-2
     \section{Linear Regression}
-
+        
+        The standard form of the hypothesis function for linear regression is the following:
+        \begin{align*}
+            h_{\theta}(x) = \theta_0 + \theta_1x
+        \end{align*}
+        In the case of linear regression we use MSE as the cost function $J(\theta)$.
+        \begin{align*}
+            \frac{\partial}{\partial\theta_j}J(\theta) &= \frac{\partial}{\partial\theta_j}\frac{1}{2}(h_{\theta}(x)-y)^2 \\
+            &= 2\cdot\frac{1}{2}(h_{\theta}(x)-y)\cdot\frac{\partial}{\partial\theta_j}(h_{\theta}(x)-y) \\
+            &= (h_{\theta}(x)-y)\cdot\frac{\partial}{\partial\theta_j}\left(\sum_{i=0}^{n}\theta_ix_i-y\right) \\
+            &= (h_{\theta}(x)-y)x_j
+        \end{align*}
+        
         \begin{algorithm}
             \caption{Gradient Descent for Linear Regression}
             \begin{algorithmic}
                 \STATE $n = $number of features, $m = $number of samples
                 \STATE \emph{repeat until convergence}:
-                \STATE \hspace{12pt}$\theta_0 \gets \theta_0 - \alpha\frac{1}{m}\sum_{i=1}^{m}(h_{\theta}(x^{(i)})-y_i)$
-                \STATE \hspace{12pt}$\theta_1 \gets \theta_1 - \alpha\frac{1}{m}\sum_{i=1}^{m}((h_{\theta}(x^{(i)})-y_i)x_{i})$
+                \STATE \hspace{12pt}$\theta_0 \gets \theta_0 - \alpha\frac{1}{m}\sum_{i=1}^{m}(h_{\theta}(x^{(i)})-y^{(i)})$
+                \STATE \hspace{12pt}$\theta_1 \gets \theta_1 - \alpha\frac{1}{m}\sum_{i=1}^{m}((h_{\theta}(x^{(i)})-y^{(i)})x_1^{(i)})$
             \end{algorithmic}
         \end{algorithm}
+        
+        The point of all this is that if we start with a guess for our hypothesis and then repeatedly apply these gradient descent equations, 
+        our hypothesis will become more and more accurate.
+        \par
+        \underline{Note:} In the general case, we know that there is a possibility for gradient descent to fall into a local minimum trap, this is however impossible in the
+        case of linear regression. There is a single global minimum and no local minima.
 
+        \newpage 
 
+        \subsection{Multivariate Linear Regression}
 
+        The multivariable form of the hypothesis function accommodating these multiple features is as follows:
+        \begin{align*}
+            h_{\theta}(x) = \theta_0 + \theta_1x_1 +  \theta_1x_2 + \ldots + \theta_nx_n
+        \end{align*}
 
+        % Weird indent
+        This can be represented as follows:
+        \begin{align*}
+            \begin{bmatrix}
+                \theta_0   & \theta_1 & \theta_2 & \dots & \theta_0
+            \end{bmatrix}
+            \begin{bmatrix}
+                x_{0} \\
+                x_{1} \\
+                \vdots \\
+                x_{n} 
+            \end{bmatrix}  =  \theta^Tx
+        \end{align*}
 
+        Here we use the general gradient descent algorithm.
+
+        \subsection{Feature Scaling}
+
+        We can speed up gradient descent by having each of our input values in roughly the same range. This is because 
+        $\theta$ will descend quickly on small ranges and slowly on large ranges, and so will oscillate inefficiently
+        down to the optimum when the variables are very uneven. Scaling features becomes increasingly important when 
+        creating features (i.e. in the case of polynomial regression).
+        \par
+        Two techniques to help with this are \textbf{feature scaling} and \textbf{mean normalization}. 
+        \begin{itemize}
+            \item Feature scaling involves dividing the input values by the range (i.e. the maximum value minus the minimum value) of the input variable, 
+                  resulting in a new range of just 1. 
+            \item Mean normalization involves subtracting the average value for an input variable from the values for 
+                  that input variable resulting in a new average value for the input variable 
+                  of just zero. To implement both of these techniques, adjust your input values as shown in this formula, where $s_i$ is the range our
+                  standard deviation.
+            \begin{align*}
+                x_i \longleftarrow \frac{x_i-\mu_i}{s_i}
+            \end{align*}
+        \end{itemize}
+
+        \subsection{Learning Rate}
+
+            To monitor/make sure gradient descent is working correctly, we can plot the value of $min_{\theta}J(\theta)$ vs. 
+            the number of iterations and hope to see a reasonably paced decrease in the minimum value achieved.
+            \begin{center}
+                \begin{tikzpicture}
+                    \begin{axis}[
+                        title={\textbf{Gradient Descent Monitoring}},
+                        xlabel = {number of iterations},
+                        ylabel = {$min_{\theta}J(\theta)$}]
+                        \addplot[draw=blue, sharp plot][domain=0:500] {e^-x/50};
+                    \end{axis}
+                \end{tikzpicture}
+            \end{center}
+        
+            Properties of the learning rate $\alpha$:
+            \begin{itemize}
+                \item It has been proven that if learning rate $\alpha$ is sufficiently small, then $J(\theta)$ will decrease on every iteration.
+                \item If $\alpha$ is too small: slow convergence.
+                \item If $\alpha$ is too large: may not decrease on every iteration and thus may not converge.
+            \end{itemize}
+
+        \subsection{Normal Equation}
+
+        Gradient descent gives one way of minimizing J. Let’s discuss a second way of doing so, this time performing the minimization explicitly and
+        without resorting to an iterative algorithm. In the "Normal Equation" method, we will minimize J by explicitly taking its derivatives with 
+        respect to the $\theta_j$’s, and setting them to zero. This allows us to find the optimum theta without iteration. The normal equation formula is given below:
+        \begin{align*}
+            \theta = (X^TX)^{-1}X^Ty
+        \end{align*}
+        There is no need to do feature scaling with the normal equation. With the normal equation, computing the inversion has complexity 
+        $\mathcal{O}(n^3)$, whereas gradient descent has time complexity $\mathcal{O}(kn^2)$ . So if we have a very large number of features, the normal equation will be slow. In practice, when n exceeds 
+        10,000 it might be a good time to go from a normal solution to an iterative process.
+        \par
+        \underline{Note:} Non-invertibility/singularity of the feature/design matrix $X$ can become an issue when using the 
+        normal equation, but only in cases where the number of samples is less than or equal to the number of features $(m \leq n)$. 
+    
+    % Week 3
     \section{Logistic Regression}
 
-
-
+    % Week 4
     \section{Neural Networks}
 
-
+    % Week 5
     \section{Neural Networks/Backpropagation}
 
 \end{document}
