@@ -8,6 +8,8 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{subfig}
 \usepackage{amsfonts}\usepackage{titling}
 \renewcommand\maketitlehooka{\null\mbox{}\vfill}
 \renewcommand\maketitlehookd{\vfill\null}
@@ -17,8 +19,9 @@
 \setcounter{section}{-1} % Page numbers to start on page 1
 \setlength\parindent{0pt} % Remove indenting from entire file
 
-\title{Machine Learning -  Andrew Ng}
-\author{Matteo Esposito}
+\title{CS229 Machine Learning}
+\author{Stanford University/Coursera}
+\date{Andrew Ng}
 
 % For page counter to start on p.2
 \pagenumbering{gobble}
@@ -28,9 +31,11 @@
 
 \begin{document}
 
+    % Title page
     \begin{titlingpage}
         \maketitle
     \end{titlingpage}
+
     \newpage
 
     \section{Introduction}
@@ -145,7 +150,7 @@
         This can be represented as follows:
         \begin{align*}
             \begin{bmatrix}
-                \theta_0   & \theta_1 & \theta_2 & \dots & \theta_0
+                \theta_0   & \theta_1 & \theta_2 & \dots & \theta_n
             \end{bmatrix}
             \begin{bmatrix}
                 x_{0} \\
@@ -179,14 +184,14 @@
 
         \subsection{Learning Rate}
 
-            To monitor/make sure gradient descent is working correctly, we can plot the value of $min_{\theta}J(\theta)$ vs. 
+            To monitor/make sure gradient descent is working correctly, we can plot the value of $\min_{\theta}J(\theta)$ vs. 
             the number of iterations and hope to see a reasonably paced decrease in the minimum value achieved.
             \begin{center}
                 \begin{tikzpicture}
                     \begin{axis}[
                         title={\textbf{Gradient Descent Monitoring}},
                         xlabel = {number of iterations},
-                        ylabel = {$min_{\theta}J(\theta)$}]
+                        ylabel = {$\min_{\theta}J(\theta)$}]
                         \addplot[draw=blue, sharp plot][domain=0:500] {e^-x/50};
                     \end{axis}
                 \end{tikzpicture}
@@ -201,21 +206,145 @@
 
         \subsection{Normal Equation}
 
-        Gradient descent gives one way of minimizing J. Let’s discuss a second way of doing so, this time performing the minimization explicitly and
-        without resorting to an iterative algorithm. In the "Normal Equation" method, we will minimize J by explicitly taking its derivatives with 
-        respect to the $\theta_j$’s, and setting them to zero. This allows us to find the optimum theta without iteration. The normal equation formula is given below:
-        \begin{align*}
-            \theta = (X^TX)^{-1}X^Ty
-        \end{align*}
-        There is no need to do feature scaling with the normal equation. With the normal equation, computing the inversion has complexity 
-        $\mathcal{O}(n^3)$, whereas gradient descent has time complexity $\mathcal{O}(kn^2)$ . So if we have a very large number of features, the normal equation will be slow. In practice, when n exceeds 
-        10,000 it might be a good time to go from a normal solution to an iterative process.
-        \par
-        \underline{Note:} Non-invertibility/singularity of the feature/design matrix $X$ can become an issue when using the 
-        normal equation, but only in cases where the number of samples is less than or equal to the number of features $(m \leq n)$. 
+            Gradient descent gives one way of minimizing $J$. Let’s discuss a second way of doing so, this time performing the minimization explicitly and
+            without resorting to an iterative algorithm. In the "Normal Equation" method, we will minimize $J$ by explicitly taking its derivatives with 
+            respect to the $\theta_j$’s, and setting them to zero. This allows us to find the optimum theta without iteration. The normal equation formula is given below:
+            \begin{align*}
+                \theta = (X^TX)^{-1}X^Ty
+            \end{align*}
+            There is no need to do feature scaling with the normal equation. With the normal equation, computing the inversion has complexity 
+            $\mathcal{O}(n^3)$, whereas gradient descent has time complexity $\mathcal{O}(kn^2)$ . So if we have a very large number of features, the normal equation will be slow. In practice, when n exceeds 
+            10,000 it might be a good time to go from a normal solution to an iterative process.
+            \par
+            \underline{Note:} Non-invertibility/singularity of the feature/design matrix $X$ can become an issue when using the 
+            normal equation, but only in cases where the number of samples is less than or equal to the number of features $(m \leq n)$. 
     
     % Week 3
     \section{Logistic Regression}
+
+        \subsection{Classification and Representation}
+            Binary classifiers are widely used in machine learning applications, to predict output, or probability of output where the 
+            range of possible values is a small set of discrete values (e.g. 0 \& 1). We technically can use linear regression
+            to map all predictions greater than 0.5 to 1 and 0 otherwise. For binary classification purposes, intuitively, it doesn’t make sense for $h_\theta(x)$
+            to take values larger than 1 or smaller than 0 when we know that $y \in \{0, 1\}$.  To fix this, let’s change the form 
+            for our hypotheses $h_\theta(x)$ to satisfy $0 \leq h_\theta (x) \leq 1$. This is accomplished by plugging $\theta^Tx$ into the \textbf{Logistic Function}.
+            Our new form uses the "Sigmoid Function," also called the "Logistic Function":
+
+            \vspace{-6pt}
+
+            \begin{align*}
+                h_{\theta}(x) = g(\theta^Tx) \hspace{3em} z = \theta^Tx \hspace{3em} g(z) = \frac{1}{1-e^{-z}} \\
+            \end{align*}
+
+            \begin{center}
+                \begin{tikzpicture}[scale=0.85]
+                    \begin{axis}[
+                        title={\textbf{Sigmoid Function}},
+                        xlabel = {$z$},
+                        ylabel = {$g(z)$}]
+                        \addplot[draw=blue, sharp plot][domain=-7:7] {1/(1+e^-x)};
+                    \end{axis}
+                \end{tikzpicture}
+            \end{center}
+
+            The function $g(z)$, shown here, maps any real number to the $(0, 1)$ interval, making it useful for transforming an 
+            arbitrary-valued function into a function better suited for classification.
+
+            $h_\theta(x)$ will give us the probability that our output is 1. For example, $h_\theta(x) = 0.7$
+            gives us a probability of 70\% that our output is 1. Our probability that our prediction is 0 is just the complement of 
+            our probability that it is 1 (e.g. if probability that it is 1 is 70\%, then the probability that it is 0 is 30\%).
+
+            \begin{center}
+                $\begin{cases}
+                    h_\theta(x) = P(y=1|x;0) = 1 - P(y=0|x;0) \\
+                    P(y=1|x;0) + P(y=0|x;0) = 1  
+                \end{cases}$
+            \end{center}
+
+            The decision boundary is the line that separates the area where y = 0 and where y = 1. 
+            It is created by our hypothesis function. Example:
+
+            \begin{align*}
+                \theta = 
+                \begin{bmatrix}
+                    5 \\
+                    -1 \\
+                    0
+                \end{bmatrix} \Longrightarrow y=1 \text{ if } 5 + (-1)x_1 + 0x_2 \geq 0 \therefore x1 \leq 5
+            \end{align*}
+
+            In this case, our decision boundary is a straight vertical line placed on the graph where $x_1 = 5$, and everything
+            to the left of that denotes $y = 1$, otherwise 0.
+
+            Again, the input to the sigmoid function $g(z) (e.g. \theta^TX)$ doesn't need to be linear, and could be a function that
+            describes a circle $z = \theta + \theta x_1^2 + \theta_2x_2^2$ or any shape to fit our data.
+
+            \subsection{Logistic Regression Model}
+            
+                \subsubsection{Cost Function}
+
+                We cannot use the same cost function that we use for linear regression because the Logistic Function will cause the output to be wavy, 
+                causing many local optima. In other words, it will not be a convex function. Instead, our cost function for logistic regression looks like:
+            
+                \begin{align*}
+                    J(\theta) = \frac{1}{m} Cost(h_{\theta}(x^{(i)}),y^{(i)}) 
+                \end{align*}
+                \vspace{-6pt}
+                \begin{align*}
+                    \begin{cases}
+                        Cost(h_{\theta}(x),y) = -log(h_{\theta}(x)) & \mbox{if } y = 1 \\
+                        Cost(h_{\theta}(x),y) = -log(1-h_{\theta}(x)) & \mbox{if } y = 0 \\
+                    \end{cases}    
+                \end{align*}
+                
+                \begin{center}
+                    \centering
+                    \begin{tikzpicture}[scale=0.8]
+                        \begin{axis}[
+                            title={\textbf{Logistic Cost Function} $(y=1)$},
+                            xlabel = {$h_{\theta}(x)$},
+                            ylabel = {$J(\theta)$}]
+                            \addplot[draw=blue, sharp plot][domain=0:1] {-ln(x)};
+                        \end{axis}
+                    \end{tikzpicture}
+                    \qquad
+                    \begin{tikzpicture}[scale=0.8]
+                        \begin{axis}[
+                            title={\textbf{Logistic Cost Function} $(y=0)$},
+                            xlabel = {$h_{\theta}(x)$},
+                            ylabel = {$J(\theta)$}]
+                            \addplot[draw=blue, sharp plot][domain=0:1] {-ln(1-x)};
+                        \end{axis}
+                    \end{tikzpicture}
+                \end{center}
+
+                If our correct answer 'y' is 0, then the cost function will be 0 if our hypothesis function also outputs 0. 
+                If our hypothesis approaches 1, then the cost function will approach infinity.
+
+                If our correct answer 'y' is 1, then the cost function will be 0 if our hypothesis function outputs 1. 
+                If our hypothesis approaches 0, then the cost function will approach infinity.
+                \begin{align*}
+                    \begin{cases}
+                        Cost(h_{\theta}(x),y) = 0 \text{ if } h_{\theta}(x) = y \\
+                        Cost(h_{\theta}(x),y) \longrightarrow \infty \text{ if } y = 0 \text{ and } h_{\theta}(x) \longrightarrow 1 \\
+                        Cost(h_{\theta}(x),y) \longrightarrow \infty \text{ if } y = 1 \text{ and } h_{\theta}(x) \longrightarrow 0
+                    \end{cases}
+                \end{align*}
+                We can compress our cost function's two conditional cases into one case:
+                \begin{align*}
+                    Cost(h_{\theta}(x),y) = -ylog(h_{\theta}(x)) - (1-y)log(1-h_{\theta}(x))
+                \end{align*}
+                Therefore,
+                \begin{align*}
+                    J(\theta) = -\frac{1}{m}\sum_{i=1}^{m}[y^{(i)}log(h_{\theta}(x^{(i)})) + (1-y^{(i)})log(1-h_{\theta}(x^{(i)})]
+                \end{align*}
+            \subsection{Multiclass Classification}
+
+
+
+            \subsection{Solving the Problem of Overfitting}
+
+
 
     % Week 4
     \section{Neural Networks}
