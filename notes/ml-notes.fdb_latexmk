@@ -1,6 +1,6 @@
 # Fdb version 3
-["pdflatex"] 1542569122 "/Users/Matteo/Github/coursera-ml/notes/ml-notes.tex" "ml-notes.pdf" "ml-notes" 1542569126
-  "/Users/Matteo/Github/coursera-ml/notes/ml-notes.tex" 1542569122 18746 4339a1a17ba83cc462e5e5eb0cd98074 ""
+["pdflatex"] 1542581434 "/Users/Matteo/Github/coursera-ml/notes/ml-notes.tex" "ml-notes.pdf" "ml-notes" 1542581438
+  "/Users/Matteo/Github/coursera-ml/notes/ml-notes.tex" 1542581434 23476 7c606ecf2205f93b22b8e44f3978d561 ""
   "/usr/local/texlive/2017/texmf-dist/fonts/map/fontname/texfonts.map" 1480098670 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1480098698 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2017/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1480098698 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -197,9 +197,9 @@
   "/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1495593472 2350277 a699055bee05bf8a40b0504752487295 ""
   "/usr/local/texlive/2017/texmf-var/web2c/pdftex/pdflatex.fmt" 1495593487 4129592 0e6cfee100d68e6d96b92c0258f2ff73 ""
   "/usr/local/texlive/2017/texmf.cnf" 1495593465 577 2b71d4d888f9e5560b2e99985915a9fa ""
-  "ml-notes.aux" 1542569126 1604 7233c286e9908339a33a856011cd963e ""
-  "ml-notes.tex" 1542569122 18746 4339a1a17ba83cc462e5e5eb0cd98074 ""
+  "ml-notes.aux" 1542581438 1652 5d50647a9a8f411a96675bd1d37b7a56 ""
+  "ml-notes.tex" 1542581434 23476 7c606ecf2205f93b22b8e44f3978d561 ""
   (generated)
-  "ml-notes.aux"
   "ml-notes.pdf"
+  "ml-notes.aux"
   "ml-notes.log"

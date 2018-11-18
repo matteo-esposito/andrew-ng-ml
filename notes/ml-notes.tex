@@ -24,7 +24,7 @@
 \date{Andrew Ng}
 
 % For page counter to start on p.2
-\pagenumbering{gobble}
+% \pagenumbering{gobble}
 
 % Plot package backwards compatibility
 \pgfplotsset{compat=1.14}
@@ -34,6 +34,9 @@
     % Title page
     \begin{titlingpage}
         \maketitle
+        \centering
+        \vfill
+        {\large{Matteo Esposito}}
     \end{titlingpage}
 
     \newpage
@@ -217,7 +220,7 @@
             10,000 it might be a good time to go from a normal solution to an iterative process.
             \par
             \underline{Note:} Non-invertibility/singularity of the feature/design matrix $X$ can become an issue when using the 
-            normal equation, but only in cases where the number of samples is less than or equal to the number of features $(m \leq n)$. 
+            normal equation, but only in cases where the number of samples is less than or equal to the number of features $(m < n)$. 
     
     % Week 3
     \section{Logistic Regression}
@@ -279,72 +282,139 @@
             Again, the input to the sigmoid function $g(z) (e.g. \theta^TX)$ doesn't need to be linear, and could be a function that
             describes a circle $z = \theta + \theta x_1^2 + \theta_2x_2^2$ or any shape to fit our data.
 
-            \subsection{Logistic Regression Model}
+        \subsection{Logistic Regression Model}
+
+            We cannot use the same cost function that we use for linear regression because the Logistic Function will cause the output to be wavy, 
+            causing many local optima. In other words, it will not be a convex function. Instead, our cost function for logistic regression looks like:
+        
+            \begin{align*}
+                J(\theta) = \frac{1}{m} Cost(h_{\theta}(x^{(i)}),y^{(i)}) 
+            \end{align*}
+            \vspace{-6pt}
+            \begin{align*}
+                \begin{cases}
+                    Cost(h_{\theta}(x),y) = -log(h_{\theta}(x)) & \mbox{if } y = 1 \\
+                    Cost(h_{\theta}(x),y) = -log(1-h_{\theta}(x)) & \mbox{if } y = 0 \\
+                \end{cases}    
+            \end{align*}
             
-                \subsubsection{Cost Function}
+            \begin{center}
+                \centering
+                \begin{tikzpicture}[scale=0.9]
+                    \begin{axis}[
+                        title={\textbf{Logistic Cost Function} $(y=1)$},
+                        xlabel = {$h_{\theta}(x)$},
+                        ylabel = {$J(\theta)$}]
+                        \addplot[draw=blue, sharp plot][domain=0:1] {-ln(x)};
+                    \end{axis}
+                \end{tikzpicture}
+                \qquad
+                \begin{tikzpicture}[scale=0.9]
+                    \begin{axis}[
+                        title={\textbf{Logistic Cost Function} $(y=0)$},
+                        xlabel = {$h_{\theta}(x)$},
+                        ylabel = {$J(\theta)$}]
+                        \addplot[draw=blue, sharp plot][domain=0:1] {-ln(1-x)};
+                    \end{axis}
+                \end{tikzpicture}
+            \end{center}
 
-                We cannot use the same cost function that we use for linear regression because the Logistic Function will cause the output to be wavy, 
-                causing many local optima. In other words, it will not be a convex function. Instead, our cost function for logistic regression looks like:
-            
-                \begin{align*}
-                    J(\theta) = \frac{1}{m} Cost(h_{\theta}(x^{(i)}),y^{(i)}) 
-                \end{align*}
-                \vspace{-6pt}
-                \begin{align*}
-                    \begin{cases}
-                        Cost(h_{\theta}(x),y) = -log(h_{\theta}(x)) & \mbox{if } y = 1 \\
-                        Cost(h_{\theta}(x),y) = -log(1-h_{\theta}(x)) & \mbox{if } y = 0 \\
-                    \end{cases}    
-                \end{align*}
-                
-                \begin{center}
-                    \centering
-                    \begin{tikzpicture}[scale=0.8]
-                        \begin{axis}[
-                            title={\textbf{Logistic Cost Function} $(y=1)$},
-                            xlabel = {$h_{\theta}(x)$},
-                            ylabel = {$J(\theta)$}]
-                            \addplot[draw=blue, sharp plot][domain=0:1] {-ln(x)};
-                        \end{axis}
-                    \end{tikzpicture}
-                    \qquad
-                    \begin{tikzpicture}[scale=0.8]
-                        \begin{axis}[
-                            title={\textbf{Logistic Cost Function} $(y=0)$},
-                            xlabel = {$h_{\theta}(x)$},
-                            ylabel = {$J(\theta)$}]
-                            \addplot[draw=blue, sharp plot][domain=0:1] {-ln(1-x)};
-                        \end{axis}
-                    \end{tikzpicture}
-                \end{center}
+            If our correct answer 'y' is 0, then the cost function will be 0 if our hypothesis function also outputs 0. 
+            If our hypothesis approaches 1, then the cost function will approach infinity.
 
-                If our correct answer 'y' is 0, then the cost function will be 0 if our hypothesis function also outputs 0. 
-                If our hypothesis approaches 1, then the cost function will approach infinity.
+            If our correct answer 'y' is 1, then the cost function will be 0 if our hypothesis function outputs 1. 
+            If our hypothesis approaches 0, then the cost function will approach infinity.
+            \begin{align*}
+                \begin{cases}
+                    Cost(h_{\theta}(x),y) = 0 \text{ if } h_{\theta}(x) = y \\
+                    Cost(h_{\theta}(x),y) \longrightarrow \infty \text{ if } y = 0 \text{ and } h_{\theta}(x) \longrightarrow 1 \\
+                    Cost(h_{\theta}(x),y) \longrightarrow \infty \text{ if } y = 1 \text{ and } h_{\theta}(x) \longrightarrow 0
+                \end{cases}
+            \end{align*}
+            We can compress our cost function's two conditional cases into one case:
+            \begin{align*}
+                Cost(h_{\theta}(x),y) = -ylog(h_{\theta}(x)) - (1-y)log(1-h_{\theta}(x))
+            \end{align*}
+            Therefore,
+            \begin{align*}
+                J(\theta) = -\frac{1}{m}\sum_{i=1}^{m}[y^{(i)}log(h_{\theta}(x^{(i)})) + (1-y^{(i)})log(1-h_{\theta}(x^{(i)})]
+            \end{align*}
 
-                If our correct answer 'y' is 1, then the cost function will be 0 if our hypothesis function outputs 1. 
-                If our hypothesis approaches 0, then the cost function will approach infinity.
-                \begin{align*}
-                    \begin{cases}
-                        Cost(h_{\theta}(x),y) = 0 \text{ if } h_{\theta}(x) = y \\
-                        Cost(h_{\theta}(x),y) \longrightarrow \infty \text{ if } y = 0 \text{ and } h_{\theta}(x) \longrightarrow 1 \\
-                        Cost(h_{\theta}(x),y) \longrightarrow \infty \text{ if } y = 1 \text{ and } h_{\theta}(x) \longrightarrow 0
-                    \end{cases}
-                \end{align*}
-                We can compress our cost function's two conditional cases into one case:
-                \begin{align*}
-                    Cost(h_{\theta}(x),y) = -ylog(h_{\theta}(x)) - (1-y)log(1-h_{\theta}(x))
-                \end{align*}
-                Therefore,
-                \begin{align*}
-                    J(\theta) = -\frac{1}{m}\sum_{i=1}^{m}[y^{(i)}log(h_{\theta}(x^{(i)})) + (1-y^{(i)})log(1-h_{\theta}(x^{(i)})]
-                \end{align*}
-            \subsection{Multiclass Classification}
+        \subsection{Multiclass Classification}
 
+            Now we will approach the classification of data when we have more than two categories. Instead of $y = \{0,1\}$ we will expand our definition so that $y = \{0,1...n\}$.
 
+            Since $y = \{0,1...n\}$, we divide our problem into $n+1$ (+1 because the index starts at 0) binary classification problems; in each one, we predict 
+            the probability that 'y' is a member of one of our classes.
 
-            \subsection{Solving the Problem of Overfitting}
+            \begin{align*}
+                \begin{cases}
+                    y \in \{0,1,\ldots, n\} \\
+                    h_{\theta}^{(0)}(x) = P(y=0|x;\theta) \\
+                    h_{\theta}^{(1)}(x) = P(y=1|x;\theta) \\
+                    \ldots \\
+                    h_{\theta}^{(n)}(x) = P(y=n|x;\theta) \\
+                \end{cases}
+                \Longrightarrow \; \; \; prediction = \max_{i}(h_{\theta}^{(i)}(x))
+            \end{align*}
 
+            We are basically choosing one class and then lumping all the others into a single second class. We do this repeatedly, applying binary logistic 
+            regression to each case, and then use the hypothesis that returned the highest value as our prediction.
+        
+        \subsection{Solving the Problem of Overfitting}
 
+            \textbf{Underfitting}, or high bias, is when the form of our hypothesis function h maps poorly to the trend of the data. 
+            It is usually caused by a function that is too simple or uses too few features. At the other extreme, \textbf{overfitting}, or high variance, 
+            is caused by a hypothesis function that fits the available data but does not generalize well to predict new data. It is usually caused by 
+            a complicated function that creates a lot of unnecessary curves and angles unrelated to the data.
+
+            This terminology is applied to both linear and logistic regression. There are two main options to address the issue of overfitting:
+        
+            \begin{enumerate}
+                \item Reduce the number of features
+                    \begin{itemize}
+                        \item Manually select which features to keep
+                        \item Use a model selection algorithm        
+                    \end{itemize}
+                \item Regularization
+                    \begin{itemize}
+                        \item Keep all the features, but reduce the magnitude of parameters $\theta_j$.
+                        \item Regularization works well when we have a lot of slightly useful features.      
+                    \end{itemize}
+            \end{enumerate}
+
+            If we have overfitting from our hypothesis function, we can reduce the weight that some of the terms in our function carry by increasing their cost.
+            So, lets say we wanted to make the following function more quadratic:
+            \begin{align*}
+                 h_{\theta}(x)= \theta_{0} + \theta_{1}x + \theta_{2}x^2 + \theta_{3}x^3 + \theta_{4}x^4
+            \end{align*}
+            We want to eliminate the influence of $\theta_3x^3$ and $\theta_4x^4$. Without actually getting rid of these features or chaning the form
+            of our hypothesis, we can instead modify our cost function:
+            \begin{align*}
+                \min_{\theta}\frac{1}{2m}\sum_{i=1}^m(h_{\theta}(x^{(i)})-y^{(i)})^2 + 1000\cdot\theta_3^2 + 1000\cdot\theta_4^2
+            \end{align*}
+            We've artificially inflated the cost of $\theta_3$ and $\theta_4$.
+            Now, in order for the cost function to get close to zero, we will have to reduce the values of
+            $\theta_3$ and $\theta_4$ to near zero. This will make our cost function more quadratic.
+
+            We could also regularize all of our theta parameters in a single summation as:
+            \begin{align*}
+                \min_{\theta}\frac{1}{2m}\sum_{i=1}^m(h_{\theta}(x^{(i)})-y^{(i)})^2 + \lambda\sum_{j=1}^{n}\theta_j^2        
+            \end{align*}
+            The $\lambda$, or lambda, is the regularization parameter. It determines how much the costs of our theta parameters are inflated.
+
+            Using the above cost function with the extra summation, we can smooth the output of our hypothesis function to reduce overfitting. If lambda is chosen 
+            to be too large, it may smooth out the function too much and cause underfitting.
+
+            \begin{algorithm}
+                \caption{Regularized Gradient Descent}
+                \begin{algorithmic}
+                    \STATE $n = $number of features, $m = $number of samples
+                    \STATE \emph{repeat until convergence}:
+                    \STATE \hspace{12pt}$\theta_0 \gets \theta_0 - \alpha\frac{1}{m}\sum_{i=1}^{m}(h_{\theta}(x^{(i)})-y^{(i)})x_0^{(i)}$
+                    \STATE \hspace{12pt}$\theta_j \gets \theta_j - \alpha\left[\left(\frac{1}{m}\sum_{i=1}^{m}((h_{\theta}(x^{(i)})-y^{(i)})x_j^{(i)}\right) + \frac{\lambda}{m}\theta_j\right]$ \qquad $j \in \{1,2,\ldots,n\}$
+                \end{algorithmic}
+            \end{algorithm}    
 
     % Week 4
     \section{Neural Networks}
