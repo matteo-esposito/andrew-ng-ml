@@ -422,6 +422,50 @@
     % Week 4
     \section{Neural Networks}
 
+        At a very simple level, neurons are basically computational units that take inputs 
+        (dendrites) as electrical inputs (called "spikes") that are channeled to outputs (axons). In our model, 
+        our dendrites are like the input features $x_1 \ldots x_n$, nd the output is the result of our hypothesis function. In this model our $x_0$
+        input node is sometimes called the "bias unit." It is always equal to 1. In neural networks, 
+        we use the same logistic function as in classification, $\frac{1}{1+e^{-\theta^Tx}}$, yet we sometimes call it a sigmoid (logistic)
+        \textbf{activation} function. In this situation, our theta parameters are sometimes called "weights".
+
+        Our input nodes (layer 1), also known as the "input layer", go into another node (layer 2), which finally outputs the hypothesis function, known as the "output layer".
+
+        We can have intermediate layers of nodes between the input and output layers called the "hidden layers."
+
+        \newpage
+        In this example, we label these intermediate or "hidden" layer nodes $a_0^2 \ldots a_n^2$ and call them "activation units".
+
+        If we had one hidden layer, it would look like:
+
+        \begin{align*}
+            \begin{bmatrix}
+                x_0 \\
+                x_1 \\
+                x_2 \\
+                x_3
+            \end{bmatrix} \longrightarrow
+            \begin{bmatrix}
+                a_1^{(2)} \\
+                a_2^{(2)} \\
+                a_3^{(2)} 
+            \end{bmatrix} \longrightarrow h_{\theta}(x)
+        \end{align*}
+        
+        The values for each of the "activation" nodes is obtained as follows:
+
+        \begin{align*}
+            \begin{cases}
+                a_1^{(2)} = g(\theta_{10}^{(1)}x_0 + \theta_{11}^{(1)}x_1 + \theta_{12}^{(1)}x_2 + \theta_{13}^{(1)}x_3) \\
+                a_2^{(2)} = g(\theta_{20}^{(1)}x_0 + \theta_{21}^{(1)}x_1 + \theta_{22}^{(1)}x_2 + \theta_{23}^{(1)}x_3) \\
+                a_3^{(2)} = g(\theta_{30}^{(1)}x_0 + \theta_{31}^{(1)}x_1 + \theta_{32}^{(1)}x_2 + \theta_{33}^{(1)}x_3)
+            \end{cases} \longrightarrow \; \;h_{\theta}(x) = a_1^{(3)} = g(\theta_{10}^{(2)}a_0^{(2)} + \theta_{11}^{(2)}a_1^{(2)}+ \theta_{12}^{(2)}a_2^{(2)} + \theta_{13}^{(2)}a_3^{(2)})
+        \end{align*}
+
+        Our hypothesis output is the logistic function applied to the sum of the values of our activation nodes, 
+        which have been multiplied by yet another parameter matrix $\theta^{(2)}$ containing the weights for our second layer of nodes.
+        (Every layer gets its own matrix of weights, $\theta^{(j)}$).
+
         \begin{center}
             \begin{tikzpicture}[shorten >=1pt,->,draw=black!50, node distance=\layersep]
                 \tikzstyle{every pin edge}=[<-,shorten <=1pt]
@@ -431,37 +475,99 @@
                 \tikzstyle{hidden neuron}=[neuron, fill=blue!50];
                 \tikzstyle{annot} = [text width=4em, text centered]
             
-                % Draw the input layer nodes
-                \foreach \name / \y in {1,...,4}
+                % Draw the bias unit node
+                \foreach \name / \y in {0}
                 % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
-                    \node[input neuron, pin=left:Input \#\y] (I-\name) at (0,-\y) {};
+                    \node[input neuron, pin=left:Bias unit] (I-\name) at (0,-\y-1.5) {};
+
+                % Draw the input layer nodes
+                \foreach \name / \y in {1,...,3}
+                % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
+                    \node[input neuron, pin=left:Input \#\y] (I-\name) at (0,-\y-1.5) {};
             
                 % Draw the hidden layer nodes
-                \foreach \name / \y in {1,...,5}
-                    \path[yshift=0.5cm]
+                \foreach \name / \y in {1,...,3}
+                    \path[yshift=-1cm]
                         node[hidden neuron] (H-\name) at (\layersep,-\y cm) {};
             
                 % Draw the output layer node
-                \node[output neuron,pin={[pin edge={->}]right:Output}, right of=H-3] (O) {};
+                \node[output neuron,pin={[pin edge={->}]right:Output}, right of=H-2] (O) {};
             
                 % Connect every node in the input layer with every node in the
                 % hidden layer.
-                \foreach \source in {1,...,4}
-                    \foreach \dest in {1,...,5}
+                \foreach \source in {0,...,3}
+                    \foreach \dest in {1,...,3}
                         \path (I-\source) edge (H-\dest);
             
                 % Connect every node in the hidden layer with the output layer
-                \foreach \source in {1,...,5}
+                \foreach \source in {1,...,3}
                     \path (H-\source) edge (O);
             
                 % Annotate the layers
-                \node[annot,above of=H-1, node distance=1cm] (hl) {Hidden layer};
+                \node[annot,above of=H-1, node distance=1.5cm] (hl) {Hidden layer};
                 \node[annot,left of=hl] {Input layer};
                 \node[annot,right of=hl] {Output layer};
             \end{tikzpicture}
         \end{center}
 
+        Here we can define a new variable $z_k^{(j)}$ that encompasses the parameters indide out $g$ function. In our
+        previous example if we replaced by the variable $z$ for all the parameters we would get:
+
+        \begin{align*}
+            \begin{cases}
+                a_1^{(2)} = g(z_1^{(2)}) \\
+                a_2^{(2)} = g(z_3^{(2)}) \\
+                a_3^{(2)} = g(z_3^{(2)})
+            \end{cases}
+        \end{align*}
+
+        In other words, for layer $j=2$ and node $k$, the variable $z$ would be:
+        \begin{align*}
+            z_k^{(2)} = \theta_{k,0}^{(1)}x_0 + \theta_{k,1}^{(1)}x_1 + \ldots + \theta_{k,n}^{(1)}x_n
+        \end{align*}
+        We then get our final result with:
+        \begin{align*}
+            h_{\theta}(x) = a^{(j+1)} = g(z^{(j+1)}) \quad \text{where} \quad z^{(j+1)} = \theta^{(j)}a^{(j)}
+        \end{align*}
+
+        \underline{Note:} Here, $\theta$ represents a matrix of weights. In the last step we are performing a logistic regression.
+
+        \subsection{Examples}
+
+            We will showcase a simple example of applying neural networks by predicting $x_1$ AND $x_2$, which is the logical
+            'and' operator and is only true if both $x_1$ and $x_2$ are 1 (or true).
+
+            The graph of our function will look like:
+            \begin{align*}
+                \begin{bmatrix}
+                    x_0 \\
+                    x_1 \\
+                    x_2
+                \end{bmatrix} \longrightarrow \;
+                \begin{bmatrix}
+                    g(z^{(2)})
+                \end{bmatrix} \longrightarrow \; h_{\theta}(x)
+            \end{align*}
+                
+            Let's set our first theta matrix as:
+            \begin{align*}
+                \theta^{(1)} = [-30 \; \; \; 20 \; \; \; 20]
+            \end{align*}
+            This will cause the output of our hypothesis to only be positive if both $x_1$ and $x_2$ are 1. In other words:
+            \begin{align*}
+                h_{\theta}(x) = g(-30 + 20x_1 + 20x_2)
+            \end{align*}
+            
+            \begin{align*}
+                \begin{cases}
+                    x_1 = 0 \text{  and  } x_2 = 0 \; \; \longrightarrow \; \; g(-30) \approx 0 \\
+                    x_1 = 0 \text{  and  } x_2 = 1 \; \; \longrightarrow \; \; g(-10) \approx 0 \\
+                    x_1 = 1 \text{  and  } x_2 = 0 \; \; \longrightarrow \; \; g(-10) \approx 0 \\
+                    x_1 = 1 \text{  and  } x_2 = 1 \; \; \longrightarrow \; \; g(10) \approx 1 \text{  ***}
+                \end{cases}
+            \end{align*}
     % Week 5
+    \newpage
     \section{Neural Networks/Backpropagation}
 
 
@@ -470,7 +576,7 @@
     \section{Advice for Applying Machine Learning}
 
 
-    
+
     % Week 7
     \section{Support Vector Machines}
 
